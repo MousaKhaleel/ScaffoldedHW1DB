@@ -1,0 +1,6 @@
+@ScaffoldedHW1DB_HostAddress = http://localhost:5186
+
+GET {{ScaffoldedHW1DB_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
