@@ -1,24 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScaffoldedHW1DB.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace ScaffoldedHW1DB.Controllers
 {
 	[ApiController]
-	[Route("[controller]")]
+	[Route("api/[controller]")]
 	public class EmployeesController : ControllerBase
 	{
 		private readonly SkyHw1Context _context;
-
 		public EmployeesController(SkyHw1Context context)
 		{
 			_context = context;
 		}
 
+		//		Write LINQ query to list all employees along with their department name.Include
+		//the employee&#39;s first and last name, department name, and hire date.
+
 		[HttpGet("GetEmployeesWithDepartmentNames")]
-		public IActionResult GetEmployeesWithDepartments()
+		public async Task<IActionResult> GetEmployeesWithDepartments()
 		{
-			var result = _context.Employees
+			var result = await _context.Employees
 				.Include(x => x.Department)
 				.Select(x => new
 				{
@@ -27,14 +34,19 @@ namespace ScaffoldedHW1DB.Controllers
 					DepartmentName = x.Department.DepartmentName,
 					x.HireDate
 				})
-				.ToList();
+				.ToListAsync();
 
 			return Ok(result);
 		}
+
+		//2. Write LINQ query to list all departments along with their employees.If a
+		//department has no employees, still list the department but display null for employee
+		//		details.
+
 		[HttpGet("GetDepartmentsWithEmployees")]
-		public IActionResult GetDepartmentsWithEmployees()
+		public async Task<IActionResult> GetDepartmentsWithEmployees()
 		{
-			var result = _context.Departments
+			var result = await _context.Departments
 				.Select(x => new
 				{
 					DepartmentName = x.DepartmentName,
@@ -45,29 +57,37 @@ namespace ScaffoldedHW1DB.Controllers
 						y.HireDate
 					}).ToList()
 				})
-				.ToList();
+				.ToListAsync();
 
 			return Ok(result);
 		}
 
+		//3. Write LINQ query to find the total number of employees in each department and
+		//display only departments with more than 1 employee.
+
 		[HttpGet("GetEmployeeCountBydepartments")]
-		public IActionResult GetDepartmentsWithEmployeeCount()
+		public async Task<IActionResult> GetDepartmentsWithEmployeeCount()
 		{
-			var result = _context.Departments
+			var result = await _context.Departments
 				.Where(x => x.Employees.Count > 1)
 				.Select(x => new
 				{
 					DepartmentName = x.DepartmentName,
 					EmployeeCount = x.Employees.Count
 				})
-				.ToList();
+				.ToListAsync();
 
 			return Ok(result);
 		}
+
+		//4. Write LINQ query to find the count of employees who have a salary greater than
+		//$5000. Group the result by department and display only departments where the count
+		//of such employees is greater than 1
+
 		[HttpGet("GetDepartmentsWithHighSalary")]
-		public IActionResult GetDepartmentsWithHighEarners()
+		public async Task<IActionResult> GetDepartmentsWithHighEarners()
 		{
-			var result = _context.Departments
+			var result = await _context.Departments
 				.Select(x => new
 				{
 					DepartmentName = x.DepartmentName,
@@ -79,7 +99,7 @@ namespace ScaffoldedHW1DB.Controllers
 						.Count(c => c.Salary.Salary1 > 5000)
 				})
 				.Where(x => x.HighEarnerCount > 1)
-				.ToList();
+				.ToListAsync();
 
 			return Ok(result);
 		}
